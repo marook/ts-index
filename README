@@ -1,4 +1,4 @@
-ts-index - a global names typescript indexer
+ts-index - parses global names from typescript code within a directory
 
 1) Introduction
 2) Usage
@@ -18,8 +18,8 @@ generate imports.
 
 The ts-index stdout output looks for example like this:
 
-("+" "/path/to/some/file.ts" "function" "f" nil)
-("+" "/path/to/some/file.ts" "class" "MyClass" t)
+("+" "/path/to/some/file.ts" "function" "f" nil 12)
+("+" "/path/to/some/file.ts" "class" "MyClass" t 35)
 ("-" "/path/to/some/file.ts")
 
 Lists starting with a "+" indicate that global artifacts got
@@ -28,7 +28,10 @@ should be discarded.
 
 The second column is the file name of the affected typescript file.
 
-The last item in the lists is a flag if the artifact is exported.
+The fourth item in the lists is a flag if the artifact is exported.
+
+The sixth item is the byte position in the file where the name of the
+global artifact starts. The first byte in the file has the position 0.
 
 ts-index watches the file system for changes and reflects the changes
 via stdout.
