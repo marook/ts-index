@@ -3,6 +3,7 @@ ts-index - a global names typescript indexer
 1) Introduction
 2) Usage
 3) Test
+4) License
 
 
 ------------------------------------------------------------------------
@@ -44,3 +45,9 @@ $ node . path/to/my/ts/workspace
 Test
 
 $ npm run test
+
+
+------------------------------------------------------------------------
+License
+
+See file COPYING.
