@@ -1,0 +1,5 @@
+("+" "TEST_RUN_DIR/watch/src/basics.ts" "function" "myExportedFunction" t)
+("+" "TEST_RUN_DIR/watch/src/basics.ts" "interface" "SomeExportedInterface" t)
+("+" "TEST_RUN_DIR/watch/src/basics.ts" "class" "SomeExportedClass" t)
+("+" "TEST_RUN_DIR/watch/src/basics.ts" "class" "SomeNotExportedClass" nil)
+("-" "TEST_RUN_DIR/watch/src/basics.ts")

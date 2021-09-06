@@ -1,0 +1,3 @@
+("+" "TEST_RUN_DIR/watch/src/f.ts" "function" "oldFunction" t)
+("-" "TEST_RUN_DIR/watch/src/f.ts")
+("+" "TEST_RUN_DIR/watch/src/f.ts" "function" "newFunction" t)

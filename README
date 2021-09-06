@@ -1,0 +1,46 @@
+ts-index - a global names typescript indexer
+
+1) Introduction
+2) Usage
+3) Test
+
+
+------------------------------------------------------------------------
+Introduction
+
+ts-index parses typescript files in a given directory and prints
+global functions, classes, etc. in a lisp format to stdout.
+
+The intention is to be able to locate global typescript
+artifacts. This could be used to go to a declaration within emacs or
+generate imports.
+
+The ts-index stdout output looks for example like this:
+
+("+" "/path/to/some/file.ts" "function" "f" nil)
+("+" "/path/to/some/file.ts" "class" "MyClass" t)
+("-" "/path/to/some/file.ts")
+
+Lists starting with a "+" indicate that global artifacts got
+added. "-" indicates that all artifacts for a certain typescript file
+should be discarded.
+
+The second column is the file name of the affected typescript file.
+
+The last item in the lists is a flag if the artifact is exported.
+
+ts-index watches the file system for changes and reflects the changes
+via stdout.
+
+
+------------------------------------------------------------------------
+Usage
+
+$ npm install
+$ node . path/to/my/ts/workspace
+
+
+------------------------------------------------------------------------
+Test
+
+$ npm run test
