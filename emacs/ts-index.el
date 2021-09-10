@@ -54,8 +54,14 @@
                   (append ts-index-global-artifacts `(,(list file-path type name exported point)))))))
 
 (defun ts-index--merge-remove-global-artifact (buffer-name change-args)
-  ;; TODO
-  )
+  (seq-let (file-path) change-args
+    (with-current-buffer buffer-name
+      (setq-local ts-index-global-artifacts
+                  (-remove
+                   (lambda (artifact)
+                     (seq-let (a-file-path) artifact
+                       (string= file-path a-file-path)))
+                   ts-index-global-artifacts)))))
 
 (defun ts-index--merge-change-into-index (buffer-name change)
   (with-current-buffer buffer-name
