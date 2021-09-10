@@ -1,0 +1,113 @@
+;; -*- lexical-binding: t -*-
+;;
+;; ts-index - a fast typescript artifact index
+;; Copyright (C) 2021  Markus Peröbner
+;;
+;; This program is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU Affero General Public License as
+;; published by the Free Software Foundation, either version 3 of the
+;; License, or (at your option) any later version.
+;;
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU Affero General Public License for more details.
+;;
+;; You should have received a copy of the GNU Affero General Public License
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+(defun ts-index--goto-global-artifact (candidates)
+  (let ((candidate (car candidates)))
+    (seq-let (file-path type name exported point) candidate
+      (find-file file-path)
+      (goto-char (+ point 1))
+      )))
+
+(defun ts-index--find-global-artifacts ()
+  (start-process
+   "ts-index-process"
+   nil
+   "ts-index" (expand-file-name (elpy-project-root))))
+
+(defun ts-index--global-artifacts-source (project-buffer-name)
+  (with-current-buffer project-buffer-name
+    (helm-build-sync-source (concat project-buffer-name " artifacts")
+      :candidates ts-index-global-artifacts
+      :candidate-number-limit 999
+      :candidate-transformer
+      (lambda (candidates)
+        (mapcar
+         (lambda (artifact)
+           (seq-let (file-path type name exported point) artifact
+             (list (concat name " - " type) artifact)
+             ))
+         candidates))
+      :action '(("Goto" . ts-index--goto-global-artifact)))))
+
+(defun ts-index--find-in-project (project-buffer-name)
+  (helm :sources (ts-index--global-artifacts-source project-buffer-name)))
+
+(defun ts-index--merge-add-global-artifact (buffer-name change-args)
+  (seq-let (file-path type name exported point) change-args
+    (with-current-buffer buffer-name
+      (setq-local ts-index-global-artifacts
+                  (append ts-index-global-artifacts `(,(list file-path type name exported point)))))))
+
+(defun ts-index--merge-remove-global-artifact (buffer-name change-args)
+  ;; TODO
+  )
+
+(defun ts-index--merge-change-into-index (buffer-name change)
+  (with-current-buffer buffer-name
+    (let ((change-type (car change)) (change-args (cdr change)))
+      (cond
+       ((string= change-type "+") (ts-index--merge-add-global-artifact buffer-name change-args))
+       ((string= change-type "-") (ts-index--merge-remove-global-artifact buffer-name change-args))
+       (t (message "Unknown ts-index change type occured: %s" change-type))))))
+
+(defun ts-index--create-project-buffer (project-root project-name project-buffer-name)
+  (make-process
+   :name (s-concat project-name " ts watcher")
+   :buffer project-buffer-name
+   :command `("ts-index" ,(expand-file-name project-root))
+   :noquery t
+   :filter
+   (lambda (p s)
+     (mapc
+      (lambda (expr)
+        (or
+         (if (and
+              (string-prefix-p "(" expr)
+              (string-suffix-p ")" expr))
+             (progn
+               ;; TODO the read expr is probably an attack vector against the running emacs instance?
+               (ts-index--merge-change-into-index project-buffer-name (read expr))
+               nil)
+           expr
+           )
+         ""))
+      (split-string s "\n"))))
+  (with-current-buffer project-buffer-name
+    (setq-local ts-index-project-root project-root)
+    (setq-local ts-index-project-name project-name)
+    (setq-local ts-index-global-artifacts ())
+    (read-only-mode))
+  (get-buffer project-buffer-name))
+
+;; (ts-index-find)
+(defun ts-index-find ()
+  (interactive)
+  (let (project-root project-name project-buffer-name project-buffer)
+    (setq project-root (elpy-project-root))
+    (setq project-name (ts-index--project-name project-root))
+    (setq project-buffer-name (s-concat "*" project-name " ts watcher*"))
+    (setq project-buffer (get-buffer project-buffer-name))
+    (unless project-buffer
+      (setq project-buffer (ts-index--create-project-buffer project-root project-name project-buffer-name)))
+    (ts-index--find-in-project project-buffer-name)))
+
+;; (ts-index--project-name "~/projects/my-project/")
+(defun ts-index--project-name (project-path)
+  (file-name-nondirectory (directory-file-name project-path)))
+
+(provide 'ts-index)

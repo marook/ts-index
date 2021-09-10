@@ -1,4 +1,4 @@
-ts-index - parses global names from typescript code within a directory
+ts-index - a fast typescript artifact index
 
 1) Introduction
 2) Usage
