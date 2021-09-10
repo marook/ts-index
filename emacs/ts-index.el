@@ -23,12 +23,6 @@
       (goto-char (+ point 1))
       )))
 
-(defun ts-index--find-global-artifacts ()
-  (start-process
-   "ts-index-process"
-   nil
-   "ts-index" (expand-file-name (elpy-project-root))))
-
 (defun ts-index--global-artifacts-source (project-name project-buffer-name)
   (helm-build-sync-source (concat project-name " artifacts")
     :candidates
