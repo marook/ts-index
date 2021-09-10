@@ -29,9 +29,9 @@
    nil
    "ts-index" (expand-file-name (elpy-project-root))))
 
-(defun ts-index--global-artifacts-source (project-buffer-name)
+(defun ts-index--global-artifacts-source (project-name project-buffer-name)
   (with-current-buffer project-buffer-name
-    (helm-build-sync-source (concat project-buffer-name " artifacts")
+    (helm-build-sync-source (concat project-name " artifacts")
       :candidates ts-index-global-artifacts
       :candidate-number-limit 999
       :candidate-transformer
@@ -39,13 +39,16 @@
         (mapcar
          (lambda (artifact)
            (seq-let (file-path type name exported point) artifact
-             (list (concat name " - " type) artifact)
-             ))
+             (let ((line (concat (substring type 0 1) (if exported "e" "-") " " name " " (file-name-nondirectory file-path))))
+               (put-text-property 0 2 'face 'shadow line)
+               (put-text-property (+ 3 (length name) 1) (length line) 'face 'shadow line)
+               (list line artifact)
+             )))
          candidates))
       :action '(("Goto" . ts-index--goto-global-artifact)))))
 
-(defun ts-index--find-in-project (project-buffer-name)
-  (helm :sources (ts-index--global-artifacts-source project-buffer-name)))
+(defun ts-index--find-in-project (project-name project-buffer-name)
+  (helm :sources (ts-index--global-artifacts-source project-name project-buffer-name)))
 
 (defun ts-index--merge-add-global-artifact (buffer-name change-args)
   (seq-let (file-path type name exported point) change-args
@@ -104,7 +107,7 @@
     (setq project-buffer (get-buffer project-buffer-name))
     (unless project-buffer
       (setq project-buffer (ts-index--create-project-buffer project-root project-name project-buffer-name)))
-    (ts-index--find-in-project project-buffer-name)))
+    (ts-index--find-in-project project-name project-buffer-name)))
 
 ;; (ts-index--project-name "~/projects/my-project/")
 (defun ts-index--project-name (project-path)
