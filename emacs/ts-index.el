@@ -57,10 +57,10 @@
   (seq-let (file-path) change-args
     (with-current-buffer buffer-name
       (setq-local ts-index-global-artifacts
-                  (-remove
+                  (seq-filter
                    (lambda (artifact)
                      (seq-let (a-file-path) artifact
-                       (string= file-path a-file-path)))
+                       (not (string= file-path a-file-path))))
                    ts-index-global-artifacts)))))
 
 (defun ts-index--merge-change-into-index (buffer-name change)
