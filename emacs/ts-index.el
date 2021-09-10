@@ -103,6 +103,36 @@
 ;; (ts-index-find)
 (defun ts-index-find ()
   (interactive)
+  "`ts-index-find` shows global typescript artifacts of the current project.
+
+The helm candidates look like this:
+ce MyClass my-class.ts
+
+The first character indicates the artifact type. Right now the
+following types are possible:
+
+c - class
+e - enum
+f - function
+i - interface
+m - module
+t - type
+v - variable
+
+The second character indicates if the artifact is exported via an
+e character. - indicates it is not exported.
+
+The status characters are followed by the name of the artifact in
+a second column.
+
+The file name in where the artifact was found is the third
+column.
+
+Invoking this function will create a buffer with a name like
+'*<projectname> ts-index*' which launches a ts-index process in
+order to scan the project's files. Kill the buffer if you don't
+need the index anymore.
+"
   (let (project-root project-name project-buffer-name project-buffer)
     (setq project-root (elpy-project-root))
     (if project-root

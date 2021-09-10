@@ -2,8 +2,9 @@ ts-index - a fast typescript artifact index
 
 1) Introduction
 2) Usage
-3) Test
-4) License
+3) Emacs Integration
+4) Test
+5) License
 
 
 ------------------------------------------------------------------------
@@ -42,6 +43,23 @@ Usage
 
 $ npm install
 $ node . path/to/my/ts/workspace
+
+
+------------------------------------------------------------------------
+Emacs Integration
+
+emacs/ts-index.el contains a emacs integration for jumping to global
+artifacts.
+
+There are some dependencies before usage:
+- helm
+- elpy-project-root
+
+The most interesting ts-index emacs function is ts-index-find.
+
+ts-index-find will only work if emacs can execute a 'ts-index' script
+with a project directory argument. The script must start the ts-index
+node.js applicaiton in a way bin/ts-index does.
 
 
 ------------------------------------------------------------------------
