@@ -32,7 +32,11 @@
 (defun ts-index--global-artifacts-source (project-name project-buffer-name)
   (with-current-buffer project-buffer-name
     (helm-build-sync-source (concat project-name " artifacts")
-      :candidates ts-index-global-artifacts
+      :candidates
+      (lambda ()
+        (with-current-buffer project-buffer-name
+          ts-index-global-artifacts))
+      :volatile t
       :candidate-number-limit 999
       :candidate-transformer
       (lambda (candidates)
