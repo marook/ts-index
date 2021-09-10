@@ -30,26 +30,25 @@
    "ts-index" (expand-file-name (elpy-project-root))))
 
 (defun ts-index--global-artifacts-source (project-name project-buffer-name)
-  (with-current-buffer project-buffer-name
-    (helm-build-sync-source (concat project-name " artifacts")
-      :candidates
-      (lambda ()
-        (with-current-buffer project-buffer-name
-          ts-index-global-artifacts))
-      :volatile t
-      :candidate-number-limit 999
-      :candidate-transformer
-      (lambda (candidates)
-        (mapcar
-         (lambda (artifact)
-           (seq-let (file-path type name exported point) artifact
-             (let ((line (concat (substring type 0 1) (if exported "e" "-") " " name " " (file-name-nondirectory file-path))))
-               (put-text-property 0 2 'face 'shadow line)
-               (put-text-property (+ 3 (length name) 1) (length line) 'face 'shadow line)
-               (list line artifact)
+  (helm-build-sync-source (concat project-name " artifacts")
+    :candidates
+    (lambda ()
+      (with-current-buffer project-buffer-name
+        ts-index-global-artifacts))
+    :volatile t
+    :candidate-number-limit 999
+    :candidate-transformer
+    (lambda (candidates)
+      (mapcar
+       (lambda (artifact)
+         (seq-let (file-path type name exported point) artifact
+           (let ((line (concat (substring type 0 1) (if exported "e" "-") " " name " " (file-name-nondirectory file-path))))
+             (put-text-property 0 2 'face 'shadow line)
+             (put-text-property (+ 3 (length name) 1) (length line) 'face 'shadow line)
+             (list line artifact)
              )))
-         candidates))
-      :action '(("Goto" . ts-index--goto-global-artifact)))))
+       candidates))
+    :action '(("Goto" . ts-index--goto-global-artifact))))
 
 (defun ts-index--find-in-project (project-name project-buffer-name)
   (helm :sources (ts-index--global-artifacts-source project-name project-buffer-name)))
