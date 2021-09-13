@@ -57,9 +57,8 @@ There are some dependencies before usage:
 
 The most interesting ts-index emacs function is ts-index-find.
 
-ts-index-find will only work if emacs can execute a 'ts-index' script
-with a project directory argument. The script must start the ts-index
-node.js applicaiton in a way bin/ts-index does.
+ts-index-find will only work if the ts-index-watch-cmd variable is
+configured properly. Check out the variable's documentation.
 
 
 ------------------------------------------------------------------------

@@ -71,28 +71,39 @@
        ((string= change-type "-") (ts-index--merge-remove-global-artifact buffer-name change-args))
        (t (message "Unknown ts-index change type occured: %s" change-type))))))
 
+(defvar ts-index-watch-cmd
+  '("ts-index")
+  "ts-index-watch-cmd is a list of command line arguments executed when starting to watch a project using the ts-index node.js application.
+
+The project's root directory is automatically added to the
+arguments when run.
+
+A usual declaration where node.js is executed directly might look
+like this:
+
+'(\"node\" \"/path/to/ts-index\"))")
+
 (defun ts-index--create-project-buffer (project-root project-name project-buffer-name)
   (make-process
    :name (s-concat project-name " ts watcher")
    :buffer project-buffer-name
-   :command `("ts-index" ,(expand-file-name project-root))
+   :command (append ts-index-watch-cmd `(,(expand-file-name project-root)))
    :noquery t
    :filter
    (lambda (p s)
-     (mapc
-      (lambda (expr)
-        (or
-         (if (and
-              (string-prefix-p "(" expr)
-              (string-suffix-p ")" expr))
-             (progn
-               ;; TODO the read expr is probably an attack vector against the running emacs instance?
-               (ts-index--merge-change-into-index project-buffer-name (read expr))
-               nil)
-           expr
-           )
-         ""))
-      (split-string s "\n"))))
+     (with-current-buffer project-buffer-name
+       (setq-local inhibit-read-only t)
+       (mapc
+        (lambda (expr)
+          (if (and
+               (string-prefix-p "(" expr)
+               (string-suffix-p ")" expr))
+              ;; TODO the read expr is probably an attack vector against the running emacs instance?
+              (ts-index--merge-change-into-index project-buffer-name (read expr))
+            (insert (s-concat expr "\n"))
+            ))
+        (split-string s "\n"))
+       (setq-local inhibit-read-only nil))))
   (with-current-buffer project-buffer-name
     (setq-local ts-index-project-root project-root)
     (setq-local ts-index-project-name project-name)
