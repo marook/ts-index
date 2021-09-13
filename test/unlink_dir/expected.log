@@ -1,0 +1,2 @@
+("+" "TEST_RUN_DIR/watch/src/dir/test.ts" "function" "myFunction" t 15)
+("-" "TEST_RUN_DIR/watch/src/dir/test.ts")
