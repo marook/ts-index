@@ -102,7 +102,6 @@
 
 ;; (ts-index-find)
 (defun ts-index-find ()
-  (interactive)
   "`ts-index-find` shows global typescript artifacts of the current project.
 
 The helm candidates look like this:
@@ -133,6 +132,7 @@ Invoking this function will create a buffer with a name like
 order to scan the project's files. Kill the buffer if you don't
 need the index anymore.
 "
+  (interactive)
   (let (project-root project-name project-buffer-name project-buffer)
     (setq project-root (elpy-project-root))
     (if project-root
