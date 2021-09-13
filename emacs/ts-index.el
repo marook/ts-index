@@ -85,7 +85,7 @@ like this:
 
 (defun ts-index--create-project-buffer (project-root project-name project-buffer-name)
   (make-process
-   :name (s-concat project-name " ts watcher")
+   :name (s-concat project-name " ts-index watcher")
    :buffer project-buffer-name
    :command (append ts-index-watch-cmd `(,(expand-file-name project-root)))
    :noquery t
