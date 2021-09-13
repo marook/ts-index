@@ -23,6 +23,39 @@
       (goto-char (+ point 1))
       )))
 
+(defun ts-index-project-relative-import (candidate)
+  (seq-let (file-path type name exported point) candidate
+    (concat
+     "import { "
+     name
+     " } from '"
+     (string-remove-prefix
+      (expand-file-name (elpy-project-root))
+      (string-remove-suffix ".ts" file-path))
+     "';\n"
+     )))
+
+(defvar ts-index-import-hook
+  `(
+    ts-index-project-relative-import
+    )
+  "ts-index-import-hook contains functions which convert candidates into import statement strings.
+
+The first function which returns not nil wins.
+
+Each function is called with one candidate argument. A candidate
+is a list containing (file-path type name exported point).")
+
+(defun ts-index--insert-import (candidates)
+  (mapc
+   (lambda (candidate)
+     (let ((statement (run-hook-with-args-until-success
+                       'ts-index-import-hook
+                       candidate)))
+       (when statement (insert statement))
+      ))
+   candidates))
+
 (defun ts-index--global-artifacts-source (project-name project-buffer-name)
   (helm-build-sync-source (concat project-name " artifacts")
     :candidates
@@ -42,7 +75,10 @@
              (list line artifact)
              )))
        candidates))
-    :action '(("Goto" . ts-index--goto-global-artifact))))
+    :action '(
+              ("Goto" . ts-index--goto-global-artifact)
+              ("Import" . ts-index--insert-import)
+              )))
 
 (defun ts-index--find-in-project (project-name project-buffer-name)
   (helm :sources (ts-index--global-artifacts-source project-name project-buffer-name)))
