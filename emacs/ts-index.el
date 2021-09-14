@@ -16,6 +16,22 @@
 ;; You should have received a copy of the GNU Affero General Public License
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+(defgroup org nil
+  "A fast typescript artifact index."
+  :tag "typescript")
+
+(defcustom ts-index-import-functions nil
+  "ts-index-import-functions contains functions which convert candidates into import statement strings.
+
+The first function which returns not nil wins.
+
+Each function is called with one candidate argument. A candidate
+is a list containing (file-path type name exported point).
+
+See ts-index-relative-import for an example import function."
+  :group 'ts-index
+  :type 'hook)
+
 (defun ts-index--goto-global-artifact (candidates)
   (let ((candidate (car candidates)))
     (seq-let (file-path type name exported point) candidate
@@ -39,22 +55,13 @@
      "';\n"
      )))
 
-(defvar ts-index-import-hook
-  `(
-    ts-index-relative-import
-    )
-  "ts-index-import-hook contains functions which convert candidates into import statement strings.
-
-The first function which returns not nil wins.
-
-Each function is called with one candidate argument. A candidate
-is a list containing (file-path type name exported point).")
+(add-hook 'ts-index-import-functions 'ts-index-relative-import 50)
 
 (defun ts-index--insert-import (candidates)
   (mapc
    (lambda (candidate)
      (let ((statement (run-hook-with-args-until-success
-                       'ts-index-import-hook
+                       'ts-index-import-functions
                        candidate)))
        (when statement (insert statement))
       ))
