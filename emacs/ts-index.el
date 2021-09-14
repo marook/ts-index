@@ -23,21 +23,25 @@
       (goto-char (+ point 1))
       )))
 
-(defun ts-index-project-relative-import (candidate)
+(defun ts-index-relative-import (candidate)
+  "ts-index-relative-import returns an import statement string for the given candidate."
   (seq-let (file-path type name exported point) candidate
     (concat
      "import { "
      name
      " } from '"
-     (string-remove-prefix
-      (expand-file-name (elpy-project-root))
-      (string-remove-suffix ".ts" file-path))
+     ;; TODO quote ' in file name
+     ;; TODO use / in import path also on windows
+     (let ((file-import-path (string-remove-suffix ".ts" (file-relative-name file-path))))
+       (unless (string-prefix-p "." file-import-path)
+         (setq file-import-path (concat "./" file-import-path)))
+       file-import-path)
      "';\n"
      )))
 
 (defvar ts-index-import-hook
   `(
-    ts-index-project-relative-import
+    ts-index-relative-import
     )
   "ts-index-import-hook contains functions which convert candidates into import statement strings.
 
