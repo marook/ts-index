@@ -67,6 +67,13 @@ See ts-index-relative-import for an example import function."
       ))
    candidates))
 
+(defun ts-index--insert-name (candidates)
+  (mapc
+   (lambda (candidate)
+     (seq-let (file-path type name exported point) candidate
+       (insert name)))
+   candidates))
+
 (defun ts-index--global-artifacts-source (project-name project-buffer-name)
   (helm-build-sync-source (concat project-name " artifacts")
     :candidates
@@ -89,6 +96,7 @@ See ts-index-relative-import for an example import function."
     :action '(
               ("Goto" . ts-index--goto-global-artifact)
               ("Import" . ts-index--insert-import)
+              ("Insert name" . ts-index--insert-name)
               )))
 
 (defun ts-index--find-in-project (project-name project-buffer-name)
