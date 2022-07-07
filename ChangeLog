@@ -1,0 +1,9 @@
+2022-07-07 Markus Peröbner <markus.peroebner@gmail.com>
+
+	* ts-index.el (ts-index-import-functions): The hook changed it's
+	expectations regarding it's functions because ts-index tries now
+	to insert imports in the right place instead at point. Therefore
+	the hook functions must return either a list of imported artifact
+	name and imported path or otherwise nil if the hook can't perform
+	the import. ts-index will use the returned name and path to merge
+	the import into the existing imports it possible.

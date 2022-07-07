@@ -40,32 +40,74 @@ See ts-index-relative-import for an example import function."
       )))
 
 (defun ts-index-relative-import (candidate)
-  "ts-index-relative-import returns an import statement string for the given candidate."
+  "ts-index-relative-import returns a list with name and relative
+import path of the given artifact."
   (seq-let (file-path type name exported point) candidate
-    (concat
-     "import { "
+    (list
      name
-     " } from '"
-     ;; TODO quote ' in file name
      ;; TODO use / in import path also on windows
      (let ((file-import-path (string-remove-suffix ".ts" (file-relative-name file-path))))
        (unless (string-prefix-p "." file-import-path)
          (setq file-import-path (concat "./" file-import-path)))
-       file-import-path)
-     "';\n"
-     )))
+       file-import-path))))
 
 (add-hook 'ts-index-import-functions 'ts-index-relative-import 50)
 
 (defun ts-index--insert-import (candidates)
   (mapc
    (lambda (candidate)
-     (let ((statement (run-hook-with-args-until-success
+     (let ((import (run-hook-with-args-until-success
                        'ts-index-import-functions
                        candidate)))
-       (when statement (insert statement))
+       (when import
+         (seq-let (name path) import
+                  (ts-index--merge-import name path)))
       ))
    candidates))
+
+(defun ts-index--merge-import (name path)
+  "ts-index-merge-import merges the import for the artifact with
+  name and path into the existing imports within the current
+  buffer. It may either append a new import statement or add name
+  to an existing one."
+  (let ((import-point (ts-index--find-import path)))
+    (if import-point
+        (ts-index--extend-import-statement import-point name)
+      (ts-index--append-import-statement name path)))
+  (message "Imported %s" name)
+  t)
+
+(defun ts-index--find-import (path)
+  (save-excursion
+    (goto-char 0)
+    (if (re-search-forward (concat "import[\s\n]*{[^}]*}[\s\n]*from[\s\n]*[\"']" path "[\"'].*;") nil t)
+        (point)
+      nil)
+    ))
+
+(defun ts-index--extend-import-statement (import-end name)
+  ;; TODO escape name in the various regular expressions in this
+  ;; function
+  (save-excursion
+    (goto-char import-end)
+    (let ((import-start (re-search-backward "import[\s\n]*{" nil t)))
+      (unless import-start
+        (error "Unable to find import start"))
+      (if (> (point) 1)
+          (left-char))
+      (unless (re-search-forward (concat "[{\s\n,]" name "[}\s\n,]") nil t)
+        (goto-char import-end)
+        (unless (re-search-backward "[^\s][\s]*}" nil t)
+          (error "Unable to find import name block end"))
+        (right-char)
+        (insert ", " name)))))
+
+(defun ts-index--append-import-statement (name path)
+  (save-excursion
+    (goto-char 0)
+     ;; TODO quote ' in file name
+    (insert (concat "import { " name " } from '" path "';\n"))
+    ))
 
 (defun ts-index--insert-name (candidates)
   (mapc
