@@ -90,12 +90,14 @@ import path of the given artifact."
   ;; function
   (save-excursion
     (goto-char import-end)
-    (let ((import-start (re-search-backward "import[\s\n]*{" nil t)))
+    (let ((import-start (re-search-backward "import[\s\n]*{" nil t))
+          name-point)
       (unless import-start
         (error "Unable to find import start"))
       (if (> (point) 1)
           (left-char))
-      (unless (re-search-forward (concat "[{\s\n,]" name "[}\s\n,]") nil t)
+      (setq name-point (re-search-forward (concat "[{\s\n,]" name "[}\s\n,]") nil t))
+      (when (or (not name-point) (>= name-point import-end))
         (goto-char import-end)
         (unless (re-search-backward "[^\s][\s]*}" nil t)
           (error "Unable to find import name block end"))
