@@ -53,6 +53,10 @@ import path of the given artifact."
 
 (add-hook 'ts-index-import-functions 'ts-index-relative-import 50)
 
+(defun ts-index--import-and-insert-name (candidates)
+  (ts-index--insert-import candidates)
+  (ts-index--insert-name candidates))
+
 (defun ts-index--insert-import (candidates)
   (mapc
    (lambda (candidate)
@@ -139,6 +143,7 @@ import path of the given artifact."
        candidates))
     :action '(
               ("Goto" . ts-index--goto-global-artifact)
+              ("Import and insert name" . ts-index--import-and-insert-name)
               ("Import" . ts-index--insert-import)
               ("Insert name" . ts-index--insert-name)
               )))
