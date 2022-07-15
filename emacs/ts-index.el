@@ -258,7 +258,7 @@ need the index anymore.
           (unless project-buffer
             (setq project-buffer (ts-index--create-project-buffer project-root project-name project-buffer-name)))
           (ts-index--find-in-project project-name project-buffer-name))
-      (message "Could not determine a project directory for ts-index."))))
+      (error "Could not determine a project directory for ts-index."))))
 
 ;; (ts-index--project-name "~/projects/my-project/")
 (defun ts-index--project-name (project-path)
