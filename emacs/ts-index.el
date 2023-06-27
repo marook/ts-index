@@ -105,8 +105,11 @@ import path of the given artifact."
         (goto-char import-end)
         (unless (re-search-backward "[^\s][\s]*}" nil t)
           (error "Unable to find import name block end"))
-        (right-char)
-        (insert ", " name)))))
+        (if (eq ?, (char-after))
+            (right-char)
+          (right-char)
+          (insert ","))
+        (insert " " name)))))
 
 (defun ts-index--append-import-statement (name path)
   (save-excursion
