@@ -216,6 +216,7 @@ like this:
   (get-buffer project-buffer-name))
 
 ;; (ts-index-find)
+;;;###autoload
 (defun ts-index-find ()
   "`ts-index-find` shows global typescript artifacts of the current project.
 
