@@ -103,7 +103,7 @@ import path of the given artifact."
       (setq name-point (re-search-forward (concat "[{\s\n,]" name "[}\s\n,]") nil t))
       (when (or (not name-point) (>= name-point import-end))
         (goto-char import-end)
-        (unless (re-search-backward "[^\s][\s]*}" nil t)
+        (unless (re-search-backward "[^\s\n][\s\n]*}" nil t)
           (error "Unable to find import name block end"))
         (if (eq ?, (char-after))
             (right-char)
