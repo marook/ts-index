@@ -53,7 +53,7 @@ artifacts.
 
 There are some dependencies before usage:
 - helm
-- elpy-project-root
+- elpy-project-root or find-file-in-project
 
 The most interesting ts-index emacs function is ts-index-find.
 

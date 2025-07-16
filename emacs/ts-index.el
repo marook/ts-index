@@ -192,7 +192,7 @@ like this:
 
 (defun ts-index--create-project-buffer (project-root project-name project-buffer-name)
   (make-process
-   :name (s-concat project-name " ts-index watcher")
+   :name (concat project-name " ts-index watcher")
    :buffer project-buffer-name
    :command (append ts-index-watch-cmd `(,(expand-file-name project-root)))
    :noquery t
@@ -207,7 +207,7 @@ like this:
                (string-suffix-p ")" expr))
               ;; TODO the read expr is probably an attack vector against the running emacs instance?
               (ts-index--merge-change-into-index project-buffer-name (read expr))
-            (insert (s-concat expr "\n"))
+            (insert (concat expr "\n"))
             ))
         (split-string s "\n"))
        (setq-local inhibit-read-only nil))))
@@ -253,11 +253,15 @@ need the index anymore.
 "
   (interactive)
   (let (project-root project-name project-buffer-name project-buffer)
-    (setq project-root (elpy-project-root))
+    (setq project-root
+	  (cond
+	   ((fboundp 'elpy-project-root) (elpy-project-root))
+	   ((fboundp 'ffip-get-project-root-directory) (ffip-get-project-root-directory))
+	   (t (error "No function like elpy-project-root found to detect project root directory."))))
     (if project-root
         (progn
           (setq project-name (ts-index--project-name project-root))
-          (setq project-buffer-name (s-concat "*" project-name " ts watcher*"))
+          (setq project-buffer-name (concat "*" project-name " ts watcher*"))
           (setq project-buffer (get-buffer project-buffer-name))
           (unless project-buffer
             (setq project-buffer (ts-index--create-project-buffer project-root project-name project-buffer-name)))
