@@ -220,8 +220,14 @@ like this:
 
 ;; (ts-index-find)
 ;;;###autoload
-(defun ts-index-find ()
+(defun ts-index-find (&optional subpath)
   "`ts-index-find` shows global typescript artifacts of the current project.
+
+An optional subpath within the detected project root directory
+can be provided. Providing a subpath is useful if only one
+directory contains typescript files that make up just a fraction
+of the projects files. Performance should be much better if you
+provide a subpath in that situation.
 
 The helm candidates look like this:
 ce MyClass my-class.ts
@@ -251,15 +257,16 @@ Invoking this function will create a buffer with a name like
 order to scan the project's files. Kill the buffer if you don't
 need the index anymore.
 "
-  (interactive)
-  (let (project-root project-name project-buffer-name project-buffer)
-    (setq project-root
+  (interactive "P")
+  (let* ((project-root
 	  (cond
 	   ((fboundp 'elpy-project-root) (elpy-project-root))
 	   ((fboundp 'ffip-get-project-root-directory) (ffip-get-project-root-directory))
 	   (t (error "No function like elpy-project-root found to detect project root directory."))))
+	project-name project-buffer-name project-buffer)
     (if project-root
         (progn
+	  (setq project-root (expand-file-name (or subpath "") project-root))
           (setq project-name (ts-index--project-name project-root))
           (setq project-buffer-name (concat "*" project-name " ts watcher*"))
           (setq project-buffer (get-buffer project-buffer-name))
